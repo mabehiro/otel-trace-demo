@@ -1,0 +1,78 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: agent-chatbot
+  namespace: otel-demo
+  labels:
+    app: agent-chatbot
+    app.kubernetes.io/component: agent-chatbot
+    app.kubernetes.io/instance: agent-chatbot
+    app.kubernetes.io/name: agent-chatbot
+    app.openshift.io/runtime-namespace: otel-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-chatbot
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: agent-chatbot
+        deployment: agent-chatbot
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+        instrumentation.opentelemetry.io/inject-python: "true"
+    spec:
+      containers:
+        - name: agent-chatbot
+          image: 'quay.io/motohiroabe/adaptive-agent-chat:openlit'
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+          env:
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: SLACK_APP_TOKEN
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: SLACK_BOT_TOKEN
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: OPENAI_API_KEY
+            - name: LANGCHAIN_TRACING_V2
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: LANGCHAIN_TRACING_V2
+            - name: TAVILY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: TAVILY_API_KEY
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://cluster-collector-collector.otel.svc.cluster.local:4318
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "k8s.namespace.name=otel-demo-2"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

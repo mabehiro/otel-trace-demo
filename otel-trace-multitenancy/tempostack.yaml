@@ -1,0 +1,23 @@
+apiVersion: tempo.grafana.com/v1alpha1
+kind:  TempoStack
+metadata:
+  name: simplest
+  namespace: otel
+spec:
+  storage:
+    secret:
+      name: minio-test
+      type: s3
+  tenants:
+    mode: openshift
+    authentication:
+      - tenantName: otel-demo-1
+        tenantId: "otel-demo-1"
+      - tenantName: otel-demo-2
+        tenantId: "otel-demo-2"
+  template:
+    gateway:
+      enabled: true
+    queryFrontend:
+      jaegerQuery:
+        enabled: true

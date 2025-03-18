@@ -1,0 +1,19 @@
+apiVersion: tempo.grafana.com/v1alpha1
+kind: TempoStack
+metadata:
+  name: simplest
+  namespace: otel-demo
+spec:
+  storageSize: 1Gi
+  storage:
+    secret:
+      name: minio-test
+      type: s3
+  template:
+    queryFrontend:
+      jaegerQuery:
+        enabled: true
+        ingress:
+          route:
+            termination: edge
+          type: route

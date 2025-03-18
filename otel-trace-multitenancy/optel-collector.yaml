@@ -1,0 +1,59 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: cluster-collector
+  namespace: otel
+spec:
+  mode: deployment
+  serviceAccount: otel-collector
+  config: |
+      receivers:
+        otlp:
+          protocols:
+            grpc: {}
+            http: {}
+      processors:
+        routing:
+          from_attribute: k8s.namespace.name
+          attribute_source: resource
+          default_exporters: [debug]
+          table:
+          - value: "otel-demo-1"
+            exporters:
+            - otlp/otel-demo-1
+          - value: "otel-demo-2"
+            exporters:
+            - otlp/otel-demo-2
+      extensions:
+        bearertokenauth:
+          filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+      exporters:
+        debug:
+          verbosity: detailed
+          sampling_initial: 1000
+          sampling_thereafter: 2000
+        otlp/otel-demo-1:
+          endpoint: tempo-simplest-gateway.otel.svc.cluster.local:8090
+          tls:
+            insecure: false
+            ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+          auth:
+            authenticator: bearertokenauth
+          headers:
+            X-Scope-OrgID: "otel-demo-1"
+        otlp/otel-demo-2:
+          endpoint: tempo-simplest-gateway.otel.svc.cluster.local:8090
+          tls:
+            insecure: false
+            ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+          auth:
+            authenticator: bearertokenauth
+          headers:
+            X-Scope-OrgID: "otel-demo-2"
+      service:
+        extensions: [bearertokenauth]
+        pipelines:
+          traces:
+            receivers: [otlp]
+            processors: [routing]
+            exporters: [otlp/otel-demo-1,otlp/otel-demo-2, debug]
