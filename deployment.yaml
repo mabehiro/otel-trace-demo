@@ -2,13 +2,13 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: agent-chatbot
-  namespace: otel-demo
+  namespace: otel-demo-2
   labels:
     app: agent-chatbot
     app.kubernetes.io/component: agent-chatbot
     app.kubernetes.io/instance: agent-chatbot
     app.kubernetes.io/name: agent-chatbot
-    app.openshift.io/runtime-namespace: otel-demo
+    app.openshift.io/runtime-namespace: otel-demo-2
 spec:
   replicas: 1
   selector:
@@ -22,11 +22,10 @@ spec:
         deployment: agent-chatbot
       annotations:
         openshift.io/generated-by: OpenShiftWebConsole
-        instrumentation.opentelemetry.io/inject-python: "true"
     spec:
       containers:
         - name: agent-chatbot
-          image: 'quay.io/motohiroabe/adaptive-agent-chat:openlit'
+          image: 'quay.io/motohiroabe/adaptive-rag:v5'
           ports:
             - containerPort: 8080
               protocol: TCP
