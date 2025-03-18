@@ -1,9 +1,6 @@
 # Ignore environment files
 .env
 
-# Ignore all text files
-*.txt
-
 # Ignore specific secret configuration
 secret.yaml
 README.md

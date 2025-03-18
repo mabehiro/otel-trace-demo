@@ -1,0 +1,13 @@
+slack_bolt
+openai
+tiktoken
+GitPython
+tavily-python
+langchain-core
+langchain-openai
+langchain-community
+langchain-chroma
+langgraph
+langchainhub
+bs4
+openlit
